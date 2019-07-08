@@ -494,15 +494,6 @@ var qrcode = function() {
 
     _this.createSvgTag = function(cellSize, margin) {
 
-      var opts = {};
-      if (typeof arguments[0] == 'object') {
-        // Called by options.
-        opts = arguments[0];
-        // overwrite cellSize and margin.
-        cellSize = opts.cellSize;
-        margin = opts.margin;
-      }
-
       cellSize = cellSize || 2;
       margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
       var size = _this.getModuleCount() * cellSize + margin * 2;
@@ -512,7 +503,8 @@ var qrcode = function() {
         ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
 
       qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
-      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' width="' + size + 'px"';
+      qrSvg += ' height="' + size + 'px"';
       qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
       qrSvg += ' preserveAspectRatio="xMinYMin meet">';
       qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
@@ -599,13 +591,6 @@ var qrcode = function() {
         '  ': ' '
       };
 
-      var blocksLastLineNoMargin = {
-        '██': '▀',
-        '█ ': '▀',
-        ' █': ' ',
-        '  ': ' '
-      };
-
       var ascii = '';
       for (y = 0; y < size; y += 2) {
         r1 = Math.floor((y - min) / cellSize);
@@ -625,13 +610,13 @@ var qrcode = function() {
           }
 
           // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
-          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+          ascii += blocks[p];
         }
 
         ascii += '\n';
       }
 
-      if (size % 2 && margin > 0) {
+      if (size % 2) {
         return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
       }
 
@@ -681,16 +666,22 @@ var qrcode = function() {
       return ascii.substring(0, ascii.length-1);
     };
 
-    _this.renderTo2dContext = function(context, cellSize) {
+    _this.renderTo2dContext = function (context, cellSize, position) {
       cellSize = cellSize || 2;
+      position = position || { x: 0, y: 0 };
       var length = _this.getModuleCount();
       for (var row = 0; row < length; row++) {
         for (var col = 0; col < length; col++) {
-          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
-          context.fillRect(row * cellSize, col * cellSize, cellSize, cellSize);
+          context.fillStyle = _this.isDark(row, col) ? "black" : "white";
+          context.fillRect(
+            row * cellSize + position.x,
+            col * cellSize + position.y,
+            cellSize,
+            cellSize
+          );
         }
       }
-    }
+    };
 
     return _this;
   };
